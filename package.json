@@ -1,0 +1,30 @@
+{
+  "name": "w-fft",
+  "version": "1.0.0",
+  "main": "dist/w-gis.umd.js",
+  "dependencies": {
+    "lodash-es": "^4.17.21",
+    "ml-fft": "^1.3.5",
+    "wsemi": "^1.7.49"
+  },
+  "devDependencies": {
+    "w-package-tools": "^1.0.75"
+  },
+  "scripts": {
+    "test": "mocha --parallel --timeout 60000 --experimental-modules --es-module-specifier-resolution=node",
+    "deploy": "gh-pages -d docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuda-lyu/w-gis.git"
+  },
+  "keywords": [
+    "package",
+    "tool",
+    "FFT",
+    "nodejs",
+    "browser"
+  ],
+  "author": "yuda-lyu(semisphere)",
+  "license": "MIT"
+}
