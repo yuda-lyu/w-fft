@@ -1,10 +1,12 @@
 import get from 'lodash-es/get.js'
 import size from 'lodash-es/size.js'
-// import each from 'lodash-es/each.js'
-// import toString from 'lodash-es/toString.js'
-// import isNumber from 'lodash-es/isNumber.js'
-// import genPm from 'wsemi/src/genPm.mjs'
-// import KissFFT from './KissFFT.mjs'
+import each from 'lodash-es/each.js'
+import range from 'lodash-es/range.js'
+import take from 'lodash-es/take.js'
+import reverse from 'lodash-es/reverse.js'
+import ispnum from 'wsemi/src/ispnum.mjs'
+import isp0num from 'wsemi/src/isp0num.mjs'
+import cdbl from 'wsemi/src/cdbl.mjs'
 import ml from 'ml-fft'
 
 
@@ -16,12 +18,14 @@ let FFT = ml.FFT
 
 function get2n(n) {
     let i = 1
-    let j = 2 * 52
+    let j = Math.pow(2, 52)
     while (true) {
         i *= 2
+        // console.log('n', n, 'i', i, 'n <= i', n <= i)
         if (n <= i) {
             break
         }
+        // console.log('j', j, 'i >= j', i >= j)
         if (i >= j) {
             break
         }
@@ -83,9 +87,9 @@ function fft1d(arr, mode = 'norm') {
         FFT.ifft(re, im)
         for (let i = 0; i < nCols; i++) {
             let _i = re[i]
-            let _j = im[i]
-            let _l = Math.sqrt(_i * _i, _j * _j)
-            res.push(_l)
+            // let _j = im[i]
+            // let _l = Math.sqrt(_i * _i, _j * _j)
+            res.push(_i)
         }
     }
 
@@ -223,6 +227,75 @@ let _ifft2d = (mat) => {
 }
 
 
+function filter1d(arr, dt, hzStart, hzEnd) {
+
+    //check dt
+    if (!ispnum(dt)) {
+        throw new Error(`dt[${dt}] is not a positive number`)
+    }
+    dt = cdbl(dt)
+
+    //check hzStart
+    if (!isp0num(hzStart)) {
+        throw new Error(`hzStart[${hzStart}] is not a positive number`)
+    }
+    hzStart = cdbl(hzStart)
+
+    //check hzEnd
+    if (!isp0num(hzEnd)) {
+        throw new Error(`hzEnd[${hzEnd}] is not a positive number`)
+    }
+    hzEnd = cdbl(hzEnd)
+
+    //_fft1d
+    let rm = _fft1d(arr)
+    // console.log('rm', rm)
+    // console.log('n1', size(arr))
+
+    //n2
+    let n2 = size(rm)
+    // console.log('n2', n2)
+
+    //T
+    let T = dt * (n2 - 1)
+    // console.log('T', T)
+
+    //df
+    let df = 1 / T
+    // console.log('df', df)
+
+    //F
+    let F = df * (n2 - 1)
+    // console.log('F', F)
+
+    //hzs
+    // let hzs = range(df, F + df, df)
+    let hzs = range(0, F, df)
+    let hzsHalf = take(hzs, n2 / 2)
+    hzs = [
+        ...hzsHalf,
+        ...reverse(hzsHalf),
+    ]
+    // console.log('hzs', JSON.stringify(hzs), size(hzs))
+
+    //帶通, 依照指定起訖頻率清除rm
+    each(hzs, (v, k) => {
+        let b = hzStart <= v && v <= hzEnd //允許通過
+        if (!b) {
+            rm[k][0] = 0
+            rm[k][1] = 0
+        }
+    })
+    // console.log('rm(clean)', JSON.stringify(rm))
+
+    //ifft1d
+    let res = _ifft1d(rm)
+    // console.log('res', res)
+
+    return res
+}
+
+
 /**
  * FFT與iFFT
  *
@@ -291,6 +364,7 @@ let WFft = {
     ifft1d: _ifft1d,
     fft2d: _fft2d,
     ifft2d: _ifft2d,
+    filter1d,
 }
 
 
