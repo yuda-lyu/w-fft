@@ -10,7 +10,7 @@ A tool for FFT.
 [![jsdelivr download](https://img.shields.io/jsdelivr/npm/hm/w-fft.svg)](https://www.jsdelivr.com/package/npm/w-fft)
 
 ## Documentation
-To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-fft/w-fft.html).
+To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-fft/global.html).
 
 ## Installation
 ### Using npm(ES6 module):
