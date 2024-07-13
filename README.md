@@ -4,7 +4,6 @@ A tool for FFT.
 ![language](https://img.shields.io/badge/language-JavaScript-orange.svg) 
 [![npm version](http://img.shields.io/npm/v/w-fft.svg?style=flat)](https://npmjs.org/package/w-fft) 
 [![license](https://img.shields.io/npm/l/w-fft.svg?style=flat)](https://npmjs.org/package/w-fft) 
-[![gzip file size](http://img.badgesize.io/yuda-lyu/w-fft/master/dist/w-fft.umd.js.svg?compression=gzip)](https://github.com/yuda-lyu/w-fft)
 [![npm download](https://img.shields.io/npm/dt/w-fft.svg)](https://npmjs.org/package/w-fft) 
 [![npm download](https://img.shields.io/npm/dm/w-fft.svg)](https://npmjs.org/package/w-fft) 
 [![jsdelivr download](https://img.shields.io/jsdelivr/npm/hm/w-fft.svg)](https://www.jsdelivr.com/package/npm/w-fft)
