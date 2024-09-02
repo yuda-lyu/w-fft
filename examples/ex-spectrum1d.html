@@ -71,6 +71,7 @@
 
                 tsd=tsd.replaceAll(',',' ')
                 tsd=tsd.replaceAll('\t',' ')
+                tsd=tsd.replaceAll('\n',' ')
                 let arr=w.sep(tsd,' ')
                 arr=_.map(arr,w.cdbl)
                 // console.log('arr',arr)
