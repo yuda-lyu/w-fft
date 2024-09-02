@@ -11,6 +11,10 @@ A tool for FFT.
 ## Documentation
 To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-fft/global.html).
 
+## Example
+To view some examples for more understanding, visit examples:
+> **spectrum1d:** [ex-spectrum1d.html](https://yuda-lyu.github.io/w-fft/examples/ex-spectrum1d.html) [[source code](https://github.com/yuda-lyu/w-fft/blob/master/docs/examples/ex-spectrum1d.html)]
+
 ## Installation
 ### Using npm(ES6 module):
 > **Note:** w-fft is mainly dependent on `ml-fft`, `lodash-es` and `wsemi`.
@@ -85,6 +89,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.3/dist/w-fft.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.4/dist/w-fft.umd.js"></script>
 
 ```
