@@ -68,7 +68,13 @@
                 // console.log('dt',dt)
 
                 let tsd=document.querySelector(`#tsd`).value
+                tsd=_.trim(tsd)
                 // console.log('tsd',tsd)
+
+                if(!w.isestr(tsd)){
+                    console.log('no data')
+                    return
+                }
 
                 tsd=tsd.replaceAll(',',' ')
                 tsd=tsd.replaceAll('\t',' ')

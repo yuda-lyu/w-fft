@@ -12,7 +12,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/wsemi/dist/wsemi.umd.js"></script>
     
-        <script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.6/dist/w-fft.umd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.7/dist/w-fft.umd.js"></script>
         <script>
             let w=wsemi
         </script>
@@ -68,7 +68,13 @@
                 // console.log('dt',dt)
 
                 let tsd=document.querySelector(`#tsd`).value
+                tsd=_.trim(tsd)
                 // console.log('tsd',tsd)
+
+                if(!w.isestr(tsd)){
+                    console.log('no data')
+                    return
+                }
 
                 tsd=tsd.replaceAll(',',' ')
                 tsd=tsd.replaceAll('\t',' ')
