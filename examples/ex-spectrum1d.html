@@ -12,7 +12,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/wsemi/dist/wsemi.umd.js"></script>
     
-        <script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.5/dist/w-fft.umd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.6/dist/w-fft.umd.js"></script>
         <script>
             let w=wsemi
         </script>
@@ -64,6 +64,7 @@
             function calc(){
 
                 let dt=document.querySelector(`#dt`).value
+                dt=w.cdbl(dt)
                 // console.log('dt',dt)
 
                 let tsd=document.querySelector(`#tsd`).value
