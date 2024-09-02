@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-tw">
+
+    <head>
+        <meta http-equiv="content-type" content="text/html charset=UTF-8" />
+        <title>spectrum1d</title>
+
+        <!-- @babel/polyfill已廢棄 -->
+        <script nomodule src="https://cdn.jsdelivr.net/npm/@babel/polyfill@7.12.1/dist/polyfill.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/wsemi/dist/wsemi.umd.js"></script>
+    
+        <script src="../dist/w-fft.umd.js"></script>
+        <script>
+            let w=wsemi
+        </script>
+
+    </head>
+
+    <body style="padding:0px 20px 0px 0px; margin:0px;">
+
+        <div style="display:flex; padding:10px;">
+
+            <div style="">
+
+                <div style="width:15vw;">
+
+                    <div style="display:flex; align-items:center; padding-bottom:10px;">
+                        
+                        <div style="padding-right:3px;">dt(s): </div>
+                        <input id="dt" type="text" style="width:100%;" value="0.01" oninput="calc();">
+
+                    </div>
+
+                    <div style="">
+
+                        <div style="">Time series data:</div>
+                        <textarea id="tsd" style="width:100%; height:calc( 94vh - 31px ); resize:none; font-size:0.7rem;" oninput="calc();"></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div style="padding-right:20px;"></div>
+
+            <div style="width:100%;">
+
+                <div style="">Spectrum:</div>
+                <textarea id="spec" style="width:100%; height:94vh; resize:none; font-size:0.7rem;"></textarea>
+
+            </div>
+
+        </div>
+
+        <script>
+
+            let wf = window['w-fft']
+            // console.log(wf)
+         
+            function calc(){
+
+                let dt=document.querySelector(`#dt`).value
+                // console.log('dt',dt)
+
+                let tsd=document.querySelector(`#tsd`).value
+                // console.log('tsd',tsd)
+
+                tsd=tsd.replaceAll(',',' ')
+                tsd=tsd.replaceAll('\t',' ')
+                let arr=w.sep(tsd,' ')
+                arr=_.map(arr,w.cdbl)
+                // console.log('arr',arr)
+
+                let res = wf.spectrum1d(arr, dt)
+                // console.log('res',res)
+
+                let mat=w.ltdtkeys2mat(res,['freq','real','imag','ampl'])
+                mat=[
+                    ['freq','real','imag','ampl'],
+                    ...mat,
+                ]
+                // console.log('mat',mat)
+
+                let csv=w.getCsvStrFromData(mat)
+                // console.log('csv',csv)
+
+                document.querySelector(`#spec`).value=csv
+
+            }
+
+        </script>
+
+    </body>
+
+</html>
