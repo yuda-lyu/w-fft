@@ -60,10 +60,18 @@
 
             let wf = window['w-fft']
             // console.log(wf)
+
+            function def(){
+                document.querySelector(`#spec`).value=''
+            }
          
             function calc(){
 
                 let dt=document.querySelector(`#dt`).value
+                if(!w.isnum(dt)){
+                    def()
+                    return
+                }
                 dt=w.cdbl(dt)
                 // console.log('dt',dt)
 
@@ -72,7 +80,7 @@
                 // console.log('tsd',tsd)
 
                 if(!w.isestr(tsd)){
-                    console.log('no data')
+                    def()
                     return
                 }
 
@@ -82,6 +90,11 @@
                 let arr=w.sep(tsd,' ')
                 arr=_.map(arr,w.cdbl)
                 // console.log('arr',arr)
+
+                if(!w.isearr(arr)){
+                    def()
+                    return
+                }
 
                 let res = wf.spectrum1d(arr, dt)
                 // console.log('res',res)
