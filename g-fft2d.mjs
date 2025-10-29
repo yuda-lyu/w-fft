@@ -24,4 +24,4 @@ arr = [
 res = wf.fft2d(arr)
 console.log(res)
 
-//node --experimental-modules g-fft2d.mjs
+//node g-fft2d.mjs

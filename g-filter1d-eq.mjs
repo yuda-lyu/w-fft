@@ -35158,4 +35158,4 @@ console.log(res)
 //   ... 65436 more items
 // ]
 
-//node --experimental-modules g-filter1d-eq.mjs
+//node g-filter1d-eq.mjs

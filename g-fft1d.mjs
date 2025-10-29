@@ -56,4 +56,4 @@ console.log(res)
 //   14,                 15
 // ]
 
-//node --experimental-modules g-fft1d.mjs
+//node g-fft1d.mjs

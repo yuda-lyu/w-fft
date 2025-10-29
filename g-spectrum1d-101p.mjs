@@ -134,4 +134,4 @@ console.log(res)
 //   ...
 // ]
 
-//node --experimental-modules g-spectrum1d-101p.mjs
+//node g-spectrum1d-101p.mjs

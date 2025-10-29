@@ -264,4 +264,4 @@ console.log(res)
 //   ... 28 more items
 // ]
 
-//node --experimental-modules g-filter1d-128p.mjs
+//node g-filter1d-128p.mjs

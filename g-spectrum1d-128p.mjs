@@ -161,4 +161,4 @@ console.log(res)
 //   ...
 // ]
 
-//node --experimental-modules g-spectrum1d-128p.mjs
+//node g-spectrum1d-128p.mjs

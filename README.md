@@ -16,8 +16,8 @@ To view some examples for more understanding, visit examples:
 > **spectrum1d:** [ex-spectrum1d.html](https://yuda-lyu.github.io/w-fft/examples/ex-spectrum1d.html) [[source code](https://github.com/yuda-lyu/w-fft/blob/master/docs/examples/ex-spectrum1d.html)]
 
 ## Installation
+
 ### Using npm(ES6 module):
-> **Note:** w-fft is mainly dependent on `ml-fft`, `lodash-es` and `wsemi`.
 ```alias
 npm i w-fft
 ```
@@ -85,7 +85,6 @@ console.log(res)
 ```
 
 ### In a browser(UMD module):
-> **Note:** w-fft does not dependent on any package.
 
 Add script for w-fft.
 ```alias
