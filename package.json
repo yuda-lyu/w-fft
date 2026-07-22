@@ -1,14 +1,14 @@
 {
   "name": "w-fft",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "dist/w-gis.umd.js",
   "dependencies": {
     "lodash-es": "^4.18.1",
     "mathjs": "^15.2.0",
-    "wsemi": "^1.8.59"
+    "wsemi": "^1.8.66"
   },
   "devDependencies": {
-    "w-package-tools": "^1.1.9"
+    "w-package-tools": "^1.1.11"
   },
   "scripts": {
     "test": "mocha --parallel --timeout 60000",
