@@ -1,14 +1,14 @@
 {
   "name": "w-fft",
-  "version": "1.0.9",
-  "main": "dist/w-gis.umd.js",
+  "version": "1.0.10",
+  "main": "dist/w-fft.umd.js",
   "dependencies": {
     "lodash-es": "^4.18.1",
     "mathjs": "^15.2.0",
-    "wsemi": "^1.8.66"
+    "wsemi": "^1.8.67"
   },
   "devDependencies": {
-    "w-package-tools": "^1.1.11"
+    "w-package-tools": "^1.1.12"
   },
   "scripts": {
     "test": "mocha --parallel --timeout 60000",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yuda-lyu/w-gis.git"
+    "url": "git+https://github.com/yuda-lyu/w-fft.git"
   },
   "keywords": [
     "package",
