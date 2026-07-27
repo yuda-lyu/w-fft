@@ -1,0 +1,45 @@
+import get from 'lodash-es/get.js'
+import _fft2d from './_fft2d.mjs'
+
+
+/**
+ * FFT2D
+ *
+ * @param {Array} mat 輸入二維實數矩陣
+ * @param {Object} [opt={}] 選項物件
+ * @param {String} [opt.type='dft'] 輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點DFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出尺寸為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實m×n點DFT，預設'dft'
+ * @return {Array} 回傳二維[re,im]複數矩陣
+ * @example
+ *
+ * let mat
+ * let res
+ *
+ * mat = [[1, 2, 3], [4, 5, 6]]
+ * res = wf.fft2d(mat)
+ * console.log(res)
+ * // => [
+ * //   [ [ 21, 1.0445074572148558e-16 ], [ -2.9999999999999982, 1.7320508075688785 ], [ -3.0000000000000013, -1.7320508075688705 ] ],
+ * //   [ [ -9, -2.326366143623307e-16 ], [ 0, -8.881784197001252e-16 ], [ 0, -2.7755575615628914e-15 ] ]
+ * // ]
+ *
+ * //type='pow2'時兩軸各自補零至2冪次(2×3補至4×4), 輸出尺寸與'dft'不同
+ * res = wf.fft2d(mat, { type: 'pow2' })
+ * console.log(res)
+ * // => [
+ * //   [ [ 21, 0 ], [ -4, -7 ], [ 7, 0 ], [ -4, 7 ] ],
+ * //   [ [ 6, -15 ], [ -7, 0 ], [ 2, -5 ], [ 3, 4 ] ],
+ * //   [ [ -9, 0 ], [ 0, 3 ], [ -3, 0 ], [ 0, -3 ] ],
+ * //   [ [ 6, 15 ], [ 3, -4 ], [ 2, 5 ], [ -7, 0 ] ]
+ * // ]
+ *
+ */
+let fft2d = (mat, opt = {}) => {
+
+    //type
+    let type = get(opt, 'type', 'dft')
+
+    return _fft2d(mat, 'norm', type)
+}
+
+
+export default fft2d

@@ -1,0 +1,100 @@
+import get from 'lodash-es/get.js'
+import size from 'lodash-es/size.js'
+import each from 'lodash-es/each.js'
+import range from 'lodash-es/range.js'
+import take from 'lodash-es/take.js'
+import ispnum from 'wsemi/src/ispnum.mjs'
+import cdbl from 'wsemi/src/cdbl.mjs'
+import fft1d from './fft1d.mjs'
+
+
+/**
+ * 振幅頻譜1D
+ *
+ * @param {Array} arr 輸入數據陣列
+ * @param {Number} dt 時間間隔，單位s
+ * @param {Object} [opt={}] 選項物件
+ * @param {Boolean} [opt.useOneTurn=true] true=輸入視為一個完整週期(頭尾重複)，週期(n-1)*dt；false=標準DFT，週期n*dt
+ * @param {String} [opt.type='dft'] 輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但頻譜點數與頻率解析度df係以補零後之2冪次點數計算，預設'dft'
+ * @return {Array} 回傳[{freq,real,imag,ampl},...]頻譜陣列
+ * @example
+ *
+ * let arr
+ * let res
+ *
+ * arr = [1, 2, 3, 4]
+ * res = wf.spectrum1d(arr, 1)
+ * console.log(res)
+ * // => [
+ * //   { freq: 0, real: 10, imag: 0, ampl: 10 },
+ * //   { freq: 0.3333333333333333, real: -2, imag: 2, ampl: 2.8284271247461903 }
+ * // ]
+ *
+ */
+function spectrum1d(arr, dt, opt = {}) {
+
+    //check dt
+    if (!ispnum(dt)) {
+        throw new Error(`dt[${dt}] is not a positive number`)
+    }
+    dt = cdbl(dt)
+
+    //useOneTurn: true(預設)=輸入視為一個完整週期(頭尾為同一相位、重複), 週期取(n-1)*dt; false=標準DFT, 週期取n*dt
+    let useOneTurn = get(opt, 'useOneTurn', true)
+
+    //type: 'dft'(預設)=mathjs真實n點DFT; 'pow2'=補零至2冪次後用ml-fft, 速度極快
+    let type = get(opt, 'type', 'dft')
+
+    //fft1d
+    let rm = fft1d(arr, { type })
+    // console.log('rm', rm)
+    // console.log('n1', size(arr))
+
+    //n
+    let n = size(rm)
+    // console.log('n', n)
+
+    //T, useOneTurn=true時週期(n-1)*dt, =false時標準DFT週期n*dt
+    let T = useOneTurn ? dt * (n - 1) : dt * n
+    // console.log('T', T)
+
+    //df
+    let df = 1 / T
+    // console.log('df', df)
+
+    //F
+    let F = df * (n - 1)
+    // console.log('F', F)
+
+    //hzs
+    // let hzs = range(df, F + df, df)
+    let hzs = range(0, F, df)
+    let hzsHalf = take(hzs, n / 2)
+    // hzs = [
+    //     ...hzsHalf,
+    //     ...reverse(hzsHalf),
+    // ]
+    hzs = hzsHalf
+    // console.log('hzs', JSON.stringify(hzs), size(hzs))
+
+    //rs
+    let rs = []
+    each(hzs, (v, k) => {
+        let freq = v
+        let real = rm[k][0]
+        let imag = rm[k][1]
+        let ampl = Math.sqrt(rm[k][0] ** 2 + rm[k][1] ** 2)
+        let r = {
+            freq,
+            real,
+            imag,
+            ampl,
+        }
+        rs.push(r)
+    })
+
+    return rs
+}
+
+
+export default spectrum1d

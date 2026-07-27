@@ -1,0 +1,89 @@
+import get from 'lodash-es/get.js'
+import size from 'lodash-es/size.js'
+import ispnum from 'wsemi/src/ispnum.mjs'
+import cdbl from 'wsemi/src/cdbl.mjs'
+import fft2d from './fft2d.mjs'
+
+
+/**
+ * 振幅頻譜2D
+ *
+ * @param {Array} mat 輸入二維實數矩陣
+ * @param {Number} dt 時間間隔，單位s
+ * @param {Object} [opt={}] 選項物件
+ * @param {Boolean} [opt.useOneTurn=true] true=各軸視為一個完整週期(頭尾重複)，週期(len-1)*dt；false=標準DFT，週期len*dt
+ * @param {String} [opt.type='dft'] 輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點DFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但頻譜尺寸與各軸頻率解析度df係以補零後之2冪次點數計算，預設'dft'
+ * @return {Array} 回傳二維[{freqRow,freqCol,real,imag,ampl},...]頻譜矩陣(僅正頻半象限)
+ * @example
+ *
+ * let mat
+ * let res
+ *
+ * mat = [[0,1,2,3],[1,2,3,4],[2,3,4,5],[3,4,5,6]]
+ * res = wf.spectrum2d(mat, 0.5)
+ * console.log(res)
+ * // => [
+ * //   [
+ * //     { freqRow: 0, freqCol: 0, real: 48, imag: 0, ampl: 48 },
+ * //     { freqRow: 0, freqCol: 0.6666666666666666, real: -8, imag: 8, ampl: 11.313708498984761 }
+ * //   ],
+ * //   [
+ * //     { freqRow: 0.6666666666666666, freqCol: 0, real: -8, imag: 8, ampl: 11.313708498984761 },
+ * //     { freqRow: 0.6666666666666666, freqCol: 0.6666666666666666, real: 0, imag: 0, ampl: 0 }
+ * //   ]
+ * // ]
+ *
+ */
+function spectrum2d(mat, dt, opt = {}) {
+
+    //check dt
+    if (!ispnum(dt)) {
+        throw new Error(`dt[${dt}] is not a positive number`)
+    }
+    dt = cdbl(dt)
+
+    //useOneTurn: true(預設)=各軸視為一個完整週期(頭尾重複), 週期(len-1)*dt; false=標準DFT, 週期len*dt
+    let useOneTurn = get(opt, 'useOneTurn', true)
+
+    //type: 'dft'(預設)=mathjs真實m×n點DFT; 'pow2'=兩軸補零至2冪次後用ml-fft, 速度極快
+    let type = get(opt, 'type', 'dft')
+
+    //fft2d, 回傳m×n之[re,im]
+    let rm = fft2d(mat, { type })
+
+    //m, n (列數, 行數)
+    let m = size(rm)
+    let n = size(get(rm, 0, []))
+
+    //df, 兩軸各自以該軸點數計算
+    let dfRow = 1 / ((useOneTurn ? m - 1 : m) * dt)
+    let dfCol = 1 / ((useOneTurn ? n - 1 : n) * dt)
+
+    //取正頻半象限 floor(m/2) × floor(n/2)(與1D取floor(n/2)一致)
+    let mHalf = Math.floor(m / 2)
+    let nHalf = Math.floor(n / 2)
+
+    //rs, 每格{freqRow, freqCol, real, imag, ampl}
+    let rs = []
+    for (let i = 0; i < mHalf; i++) {
+        let row = []
+        for (let j = 0; j < nHalf; j++) {
+            let real = rm[i][j][0]
+            let imag = rm[i][j][1]
+            let ampl = Math.sqrt(real ** 2 + imag ** 2)
+            row.push({
+                freqRow: i * dfRow,
+                freqCol: j * dfCol,
+                real,
+                imag,
+                ampl,
+            })
+        }
+        rs.push(row)
+    }
+
+    return rs
+}
+
+
+export default spectrum2d

@@ -88,6 +88,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.10/dist/w-fft.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.11/dist/w-fft.umd.js"></script>
 
 ```
