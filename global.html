@@ -134,13 +134,16 @@
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>FFT與iFFT</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>FFT與iFFT</p>
+<p>各函數皆可傳入opt.type指定計算方式:
+'dft'(預設)為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；
+'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實n點DFT。</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line1069">line 1069</a>
+        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -181,6 +184,9 @@
 
 <div class="description usertext">
     <p>FFT與iFFT</p>
+<p>各函數皆可傳入opt.type指定計算方式:
+'dft'(預設)為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；
+'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實n點DFT。</p>
 </div>
 
 
@@ -191,7 +197,61 @@
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>let arrlet resarr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]res = wf.fft1d(arr)console.log(res)// => [//   [ 120, 0 ],//   [ -8, 40.21871593700678 ],//   [ -8, 19.31370849898476 ],//   [ -8.000000000000002, 11.972846101323912 ],//   [ -8, 8 ],//   [ -7.999999999999999, 5.345429103354391 ],//   [ -8, 3.3137084989847594 ],//   [ -8.000000000000002, 1.5912989390372623 ],//   [ -8, 0 ],//   [ -8, -1.5912989390372623 ],//   [ -7.999999999999999, -3.3137084989847594 ],//   [ -7.999999999999998, -5.345429103354393 ],//   [ -7.999999999999999, -8 ],//   [ -7.999999999999999, -11.97284610132391 ],//   [ -7.999999999999997, -19.31370849898476 ],//   [ -7.999999999999993, -40.21871593700678 ]// ]arr = [    [120, 0],    [-8, 40.21871593700678],    [-8, 19.31370849898476],    [-7.999999999999999, 11.972846101323913],    [-8, 8],    [-8, 5.345429103354391],    [-8, 3.313708498984761],    [-7.999999999999999, 1.5912989390372623],    [-8, 0],    [-7.999999999999999, -1.5912989390372623],    [-8, -3.313708498984761],    [-8, -5.345429103354391],    [-8, -8],    [-7.999999999999999, -11.972846101323913],    [-8, -19.31370849898476],    [-8, -40.21871593700678]]res = wf.ifft1d(arr)console.log(res)// => [//    0,                      1,//    2.0000000000000004, 3.0000000000000013,//    4,                  5.000000000000002,//    6,                  7.000000000000001,//    8,                  9,//   10,                 10.999999999999998,//   12,                 12.999999999999998,//   14,                 15// ]</code></pre>
+    <pre class="prettyprint"><code>let arr
+let res
+
+arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+res = wf.fft1d(arr)
+console.log(res)
+// => [
+//   [ 120, 0 ],
+//   [ -8, 40.21871593700678 ],
+//   [ -8, 19.31370849898476 ],
+//   [ -8.000000000000002, 11.972846101323912 ],
+//   [ -8, 8 ],
+//   [ -7.999999999999999, 5.345429103354391 ],
+//   [ -8, 3.3137084989847594 ],
+//   [ -8.000000000000002, 1.5912989390372623 ],
+//   [ -8, 0 ],
+//   [ -8, -1.5912989390372623 ],
+//   [ -7.999999999999999, -3.3137084989847594 ],
+//   [ -7.999999999999998, -5.345429103354393 ],
+//   [ -7.999999999999999, -8 ],
+//   [ -7.999999999999999, -11.97284610132391 ],
+//   [ -7.999999999999997, -19.31370849898476 ],
+//   [ -7.999999999999993, -40.21871593700678 ]
+// ]
+
+arr = [
+    [120, 0],
+    [-8, 40.21871593700678],
+    [-8, 19.31370849898476],
+    [-7.999999999999999, 11.972846101323913],
+    [-8, 8],
+    [-8, 5.345429103354391],
+    [-8, 3.313708498984761],
+    [-7.999999999999999, 1.5912989390372623],
+    [-8, 0],
+    [-7.999999999999999, -1.5912989390372623],
+    [-8, -3.313708498984761],
+    [-8, -5.345429103354391],
+    [-8, -8],
+    [-7.999999999999999, -11.972846101323913],
+    [-8, -19.31370849898476],
+    [-8, -40.21871593700678]
+]
+res = wf.ifft1d(arr)
+console.log(res)
+// => [
+//    0,                      1,
+//    2.0000000000000004, 3.0000000000000013,
+//    4,                  5.000000000000002,
+//    6,                  7.000000000000001,
+//    8,                  9,
+//   10,                 10.999999999999998,
+//   12,                 12.999999999999998,
+//   14,                 15
+// ]</code></pre>
 
 
 
@@ -206,7 +266,7 @@
 
     
 
-    <h4 class="name" id="fft1d"><span class="type-signature"></span>fft1d<span class="signature">(arr)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="fft1d"><span class="type-signature"></span>fft1d<span class="signature">(arr, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
@@ -222,7 +282,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line186">line 186</a>
+        <a href="fft1d.mjs.html">fft1d.mjs</a>, <a href="fft1d.mjs.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -269,7 +329,58 @@
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>let arrlet resarr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]res = wf.fft1d(arr)console.log(res)// => [//   [ 120, 0 ],//   [ -8, 40.21871593700678 ],//   [ -8, 19.31370849898476 ],//   [ -8.000000000000002, 11.972846101323912 ],//   [ -8, 8 ],//   [ -7.999999999999999, 5.345429103354391 ],//   [ -8, 3.3137084989847594 ],//   [ -8.000000000000002, 1.5912989390372623 ],//   [ -8, 0 ],//   [ -8, -1.5912989390372623 ],//   [ -7.999999999999999, -3.3137084989847594 ],//   [ -7.999999999999998, -5.345429103354393 ],//   [ -7.999999999999999, -8 ],//   [ -7.999999999999999, -11.97284610132391 ],//   [ -7.999999999999997, -19.31370849898476 ],//   [ -7.999999999999993, -40.21871593700678 ]// ]</code></pre>
+    <pre class="prettyprint"><code>let arr
+let res
+
+arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+res = wf.fft1d(arr)
+console.log(res)
+// => [
+//   [ 120, 0 ],
+//   [ -8, 40.21871593700678 ],
+//   [ -8, 19.31370849898476 ],
+//   [ -8.000000000000002, 11.972846101323912 ],
+//   [ -8, 8 ],
+//   [ -7.999999999999999, 5.345429103354391 ],
+//   [ -8, 3.3137084989847594 ],
+//   [ -8.000000000000002, 1.5912989390372623 ],
+//   [ -8, 0 ],
+//   [ -8, -1.5912989390372623 ],
+//   [ -7.999999999999999, -3.3137084989847594 ],
+//   [ -7.999999999999998, -5.345429103354393 ],
+//   [ -7.999999999999999, -8 ],
+//   [ -7.999999999999999, -11.97284610132391 ],
+//   [ -7.999999999999997, -19.31370849898476 ],
+//   [ -7.999999999999993, -40.21871593700678 ]
+// ]
+
+arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+res = wf.fft1d(arr, { type: 'pow2' })
+console.log(res)
+// => [
+//   [ 120, 0 ],
+//   [ -8, 40.21871593700678 ],
+//   [ -8, 19.31370849898476 ],
+//   [ -7.999999999999999, 11.972846101323913 ],
+//   [ -8, 8 ],
+//   [ -8, 5.345429103354391 ],
+//   [ -8, 3.313708498984761 ],
+//   [ -7.999999999999999, 1.5912989390372623 ],
+//   [ -8, 0 ],
+//   [ -7.999999999999999, -1.5912989390372623 ],
+//   [ -8, -3.313708498984761 ],
+//   [ -8, -5.345429103354391 ],
+//   [ -8, -8 ],
+//   [ -7.999999999999999, -11.972846101323913 ],
+//   [ -8, -19.31370849898476 ],
+//   [ -8, -40.21871593700678 ]
+// ]
+
+//非2冪次時, type='pow2'會補零至2冪次(3點補至4點), 輸出點數與'dft'不同
+arr = [1, 2, 3]
+res = wf.fft1d(arr, { type: 'pow2' })
+console.log(res)
+// => [ [ 6, 0 ], [ -2, -2 ], [ 2, 0 ], [ -2, 2 ] ]</code></pre>
 
 
 
@@ -287,7 +398,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -313,10 +428,132 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>輸入數據陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>選項物件</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實n點DFT，預設'dft'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -369,7 +606,7 @@
 
     
 
-    <h4 class="name" id="fft2d"><span class="type-signature"></span>fft2d<span class="signature">(mat)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="fft2d"><span class="type-signature"></span>fft2d<span class="signature">(mat, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
@@ -385,7 +622,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line439">line 439</a>
+        <a href="fft2d.mjs.html">fft2d.mjs</a>, <a href="fft2d.mjs.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -432,7 +669,26 @@
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>let matlet resmat = [[1, 2, 3], [4, 5, 6]]res = wf.fft2d(mat)console.log(res)// => [//   [ [ 21, 1.0445074572148558e-16 ], [ -2.9999999999999982, 1.7320508075688785 ], [ -3.0000000000000013, -1.7320508075688705 ] ],//   [ [ -9, -2.326366143623307e-16 ], [ 0, -8.881784197001252e-16 ], [ 0, -2.7755575615628914e-15 ] ]// ]</code></pre>
+    <pre class="prettyprint"><code>let mat
+let res
+
+mat = [[1, 2, 3], [4, 5, 6]]
+res = wf.fft2d(mat)
+console.log(res)
+// => [
+//   [ [ 21, 1.0445074572148558e-16 ], [ -2.9999999999999982, 1.7320508075688785 ], [ -3.0000000000000013, -1.7320508075688705 ] ],
+//   [ [ -9, -2.326366143623307e-16 ], [ 0, -8.881784197001252e-16 ], [ 0, -2.7755575615628914e-15 ] ]
+// ]
+
+//type='pow2'時兩軸各自補零至2冪次(2×3補至4×4), 輸出尺寸與'dft'不同
+res = wf.fft2d(mat, { type: 'pow2' })
+console.log(res)
+// => [
+//   [ [ 21, 0 ], [ -4, -7 ], [ 7, 0 ], [ -4, 7 ] ],
+//   [ [ 6, -15 ], [ -7, 0 ], [ 2, -5 ], [ 3, 4 ] ],
+//   [ [ -9, 0 ], [ 0, 3 ], [ -3, 0 ], [ 0, -3 ] ],
+//   [ [ 6, 15 ], [ 3, -4 ], [ 2, 5 ], [ -7, 0 ] ]
+// ]</code></pre>
 
 
 
@@ -450,7 +706,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -476,10 +736,132 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>輸入二維實數矩陣</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>選項物件</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點DFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出尺寸為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實m×n點DFT，預設'dft'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -548,7 +930,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line773">line 773</a>
+        <a href="filter1d.mjs.html">filter1d.mjs</a>, <a href="filter1d.mjs.html#line230">line 230</a>
     </li></ul></dd>
     
 
@@ -873,6 +1255,46 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出點數與頻率解析度df係以補零後之2冪次點數計算，預設'dft'</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -945,7 +1367,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line951">line 951</a>
+        <a href="filter2d.mjs.html">filter2d.mjs</a>, <a href="filter2d.mjs.html#line37">line 37</a>
     </li></ul></dd>
     
 
@@ -1270,6 +1692,46 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點DFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出尺寸與各軸頻率解析度df係以補零後之2冪次點數計算，預設'dft'</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1326,7 +1788,7 @@
 
     
 
-    <h4 class="name" id="ifft1d"><span class="type-signature"></span>ifft1d<span class="signature">(arr)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="ifft1d"><span class="type-signature"></span>ifft1d<span class="signature">(arr, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
@@ -1342,7 +1804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line233">line 233</a>
+        <a href="ifft1d.mjs.html">ifft1d.mjs</a>, <a href="ifft1d.mjs.html#line62">line 62</a>
     </li></ul></dd>
     
 
@@ -1389,7 +1851,52 @@
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>let arrlet resarr = [    [120, 0],    [-8, 40.21871593700678],    [-8, 19.31370849898476],    [-7.999999999999999, 11.972846101323913],    [-8, 8],    [-8, 5.345429103354391],    [-8, 3.313708498984761],    [-7.999999999999999, 1.5912989390372623],    [-8, 0],    [-7.999999999999999, -1.5912989390372623],    [-8, -3.313708498984761],    [-8, -5.345429103354391],    [-8, -8],    [-7.999999999999999, -11.972846101323913],    [-8, -19.31370849898476],    [-8, -40.21871593700678]]res = wf.ifft1d(arr)console.log(res)// => [//    0,                      1,//    2.0000000000000004, 3.0000000000000013,//    4,                  5.000000000000002,//    6,                  7.000000000000001,//    8,                  9,//   10,                 10.999999999999998,//   12,                 12.999999999999998,//   14,                 15// ]</code></pre>
+    <pre class="prettyprint"><code>let arr
+let res
+
+arr = [
+    [120, 0],
+    [-8, 40.21871593700678],
+    [-8, 19.31370849898476],
+    [-7.999999999999999, 11.972846101323913],
+    [-8, 8],
+    [-8, 5.345429103354391],
+    [-8, 3.313708498984761],
+    [-7.999999999999999, 1.5912989390372623],
+    [-8, 0],
+    [-7.999999999999999, -1.5912989390372623],
+    [-8, -3.313708498984761],
+    [-8, -5.345429103354391],
+    [-8, -8],
+    [-7.999999999999999, -11.972846101323913],
+    [-8, -19.31370849898476],
+    [-8, -40.21871593700678]
+]
+res = wf.ifft1d(arr)
+console.log(res)
+// => [
+//    0,                      1,
+//    2.0000000000000004, 3.0000000000000013,
+//    4,                  5.000000000000002,
+//    6,                  7.000000000000001,
+//    8,                  9,
+//   10,                 10.999999999999998,
+//   12,                 12.999999999999998,
+//   14,                 15
+// ]
+
+res = wf.ifft1d(arr, { type: 'pow2' })
+console.log(res)
+// => [
+//    0,                  1,
+//    2, 3.0000000000000018,
+//    4,  5.000000000000002,
+//    6,                  7,
+//    8,                  9,
+//   10, 10.999999999999998,
+//   12, 12.999999999999998,
+//   14,                 15
+// ]</code></pre>
 
 
 
@@ -1407,7 +1914,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1433,10 +1944,132 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>輸入數據陣列</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>選項物件</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點iDFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 iFFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，預設'dft'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -1489,7 +2122,7 @@
 
     
 
-    <h4 class="name" id="ifft2d"><span class="type-signature"></span>ifft2d<span class="signature">(mat)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="ifft2d"><span class="type-signature"></span>ifft2d<span class="signature">(mat, opt<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
@@ -1505,7 +2138,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line466">line 466</a>
+        <a href="ifft2d.mjs.html">ifft2d.mjs</a>, <a href="ifft2d.mjs.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -1552,7 +2185,19 @@
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>let matlet resmat = [    [ [ 21, 1.0445074572148558e-16 ], [ -2.9999999999999982, 1.7320508075688785 ], [ -3.0000000000000013, -1.7320508075688705 ] ],    [ [ -9, -2.326366143623307e-16 ], [ 0, -8.881784197001252e-16 ], [ 0, -2.7755575615628914e-15 ] ]]res = wf.ifft2d(mat)console.log(res)// => [//   [ 1.0000000000000002, 2.0000000000000004, 2.9999999999999987 ],//   [ 4, 5.000000000000001, 5.999999999999999 ]// ]</code></pre>
+    <pre class="prettyprint"><code>let mat
+let res
+
+mat = [
+    [ [ 21, 1.0445074572148558e-16 ], [ -2.9999999999999982, 1.7320508075688785 ], [ -3.0000000000000013, -1.7320508075688705 ] ],
+    [ [ -9, -2.326366143623307e-16 ], [ 0, -8.881784197001252e-16 ], [ 0, -2.7755575615628914e-15 ] ]
+]
+res = wf.ifft2d(mat)
+console.log(res)
+// => [
+//   [ 1.0000000000000002, 2.0000000000000004, 2.9999999999999987 ],
+//   [ 4, 5.000000000000001, 5.999999999999999 ]
+// ]</code></pre>
 
 
 
@@ -1570,7 +2215,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1596,10 +2245,132 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>輸入二維[re,im]複數矩陣</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>選項物件</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點iDFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 iFFT，速度極快適合前端即時繪圖，但輸出尺寸為補零後之2冪次，預設'dft'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -1668,7 +2439,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line493">line 493</a>
+        <a href="spectrum1d.mjs.html">spectrum1d.mjs</a>, <a href="spectrum1d.mjs.html#line34">line 34</a>
     </li></ul></dd>
     
 
@@ -1921,6 +2692,46 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但頻譜點數與頻率解析度df係以補零後之2冪次點數計算，預設'dft'</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1993,7 +2804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line876">line 876</a>
+        <a href="spectrum2d.mjs.html">spectrum2d.mjs</a>, <a href="spectrum2d.mjs.html#line37">line 37</a>
     </li></ul></dd>
     
 
@@ -2246,6 +3057,46 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'dft'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>輸入計算方式字串，'dft'為使用mathjs對任意m×n點做真實m×n點DFT(各軸2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為兩軸各自先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但頻譜尺寸與各軸頻率解析度df係以補零後之2冪次點數計算，預設'dft'</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2317,7 +3168,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Jul 23 2026 18:22:10 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Mon Jul 27 2026 11:45:46 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

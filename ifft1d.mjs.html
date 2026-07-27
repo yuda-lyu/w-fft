@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>WFft.mjs - Documentation</title>
+    <title>ifft1d.mjs - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -35,7 +35,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">WFft.mjs</h1>
+    <h1 class="page-title">ifft1d.mjs</h1>
     
 
     
@@ -45,50 +45,21 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import fft1d from './fft1d.mjs'
-import ifft1d from './ifft1d.mjs'
-import fft2d from './fft2d.mjs'
-import ifft2d from './ifft2d.mjs'
-import spectrum1d from './spectrum1d.mjs'
-import spectrum2d from './spectrum2d.mjs'
-import filter1d from './filter1d.mjs'
-import filter2d from './filter2d.mjs'
+            <pre class="prettyprint source linenums"><code>import get from 'lodash-es/get.js'
+import _fft1d from './_fft1d.mjs'
 
 
 /**
- * FFT與iFFT
+ * iFFT1D
  *
- * 各函數皆可傳入opt.type指定計算方式:
- * 'dft'(預設)為使用mathjs對任意n點做真實n點DFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；
- * 'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 FFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，且非2冪次輸入時頻率bin為DTFT插值而非真實n點DFT。
- *
- * @returns {Array} 回傳數據陣列
+ * @param {Array} arr 輸入數據陣列
+ * @param {Object} [opt={}] 選項物件
+ * @param {String} [opt.type='dft'] 輸入計算方式字串，'dft'為使用mathjs對任意n點做真實n點iDFT(2冪次走Cooley-Tukey、其餘走Chirp-Z)，數據品質最佳但非2冪次時較慢；'pow2'為先補零至2冪次(最少4點)再使用ml-fft之radix-2 iFFT，速度極快適合前端即時繪圖，但輸出點數為補零後之2冪次，預設'dft'
+ * @return {Array} 回傳轉換後數據陣列
  * @example
  *
  * let arr
  * let res
- *
- * arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
- * res = wf.fft1d(arr)
- * console.log(res)
- * // => [
- * //   [ 120, 0 ],
- * //   [ -8, 40.21871593700678 ],
- * //   [ -8, 19.31370849898476 ],
- * //   [ -8.000000000000002, 11.972846101323912 ],
- * //   [ -8, 8 ],
- * //   [ -7.999999999999999, 5.345429103354391 ],
- * //   [ -8, 3.3137084989847594 ],
- * //   [ -8.000000000000002, 1.5912989390372623 ],
- * //   [ -8, 0 ],
- * //   [ -8, -1.5912989390372623 ],
- * //   [ -7.999999999999999, -3.3137084989847594 ],
- * //   [ -7.999999999999998, -5.345429103354393 ],
- * //   [ -7.999999999999999, -8 ],
- * //   [ -7.999999999999999, -11.97284610132391 ],
- * //   [ -7.999999999999997, -19.31370849898476 ],
- * //   [ -7.999999999999993, -40.21871593700678 ]
- * // ]
  *
  * arr = [
  *     [120, 0],
@@ -121,25 +92,30 @@ import filter2d from './filter2d.mjs'
  * //   14,                 15
  * // ]
  *
+ * res = wf.ifft1d(arr, { type: 'pow2' })
+ * console.log(res)
+ * // => [
+ * //    0,                  1,
+ * //    2, 3.0000000000000018,
+ * //    4,  5.000000000000002,
+ * //    6,                  7,
+ * //    8,                  9,
+ * //   10, 10.999999999999998,
+ * //   12, 12.999999999999998,
+ * //   14,                 15
+ * // ]
+ *
  */
-let WFft = {
+let ifft1d = (arr, opt = {}) => {
 
-    fft1d,
-    ifft1d,
+    //type
+    let type = get(opt, 'type', 'dft')
 
-    fft2d,
-    ifft2d,
-
-    spectrum1d,
-    spectrum2d,
-
-    filter1d,
-    filter2d,
-
+    return _fft1d(arr, 'inv', type)
 }
 
 
-export default WFft
+export default ifft1d
 </code></pre>
         </article>
     </section>
