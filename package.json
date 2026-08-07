@@ -1,12 +1,11 @@
 {
   "name": "w-fft",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "main": "dist/w-fft.umd.js",
   "dependencies": {
-    "lodash-es": "^4.18.1",
     "mathjs": "^15.2.0",
     "ml-fft": "^1.3.5",
-    "wsemi": "^1.8.67"
+    "wsemi": "^1.8.68"
   },
   "devDependencies": {
     "w-package-tools": "^1.1.12"
