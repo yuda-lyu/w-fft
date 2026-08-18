@@ -115,7 +115,7 @@ arr = [
 ]
 
 res = wf.spectrum1d(arr, dt)
-w.downloadExcelFileFromData('./spectrum1d-101p.xlsx', 'data', res)
+await w.downloadExcelFileFromData('./spectrum1d-101p.xlsx', 'data', res)
 fs.writeFileSync('./spectrum1d_101p.json', JSON.stringify(res), 'utf8')
 console.log(res)
 // => [
