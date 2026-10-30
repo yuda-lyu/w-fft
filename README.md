@@ -15,6 +15,17 @@ To view documentation or get support, visit [docs](https://yuda-lyu.github.io/w-
 To view some examples for more understanding, visit examples:
 > **spectrum1d:** [ex-spectrum1d.html](https://yuda-lyu.github.io/w-fft/examples/ex-spectrum1d.html) [[source code](https://github.com/yuda-lyu/w-fft/blob/master/docs/examples/ex-spectrum1d.html)]
 
+## Breaking changes
+
+### Input validation (next release)
+Every public function (`fft1d`, `ifft1d`, `fft2d`, `ifft2d`, `spectrum1d`, `spectrum2d`, `filter1d`, `filter2d`) now validates all inputs at the entry, identically for `type: 'dft'` and `type: 'pow2'`. Invalid input throws a synchronous `Error` with the message `invalid <name>: must be <description>`; the message never contains the input value. Inputs that were silently accepted, coerced or replaced by defaults before now throw:
+
+- **Data elements must be valid numbers**: a finite number or a numeric string (decimal notation such as `'12'`, `' 12 '`, `'1.2e-5'`), converted to a number before computing. `'-'`, `'NP'`, `''`, `null`, `undefined`, booleans, `NaN`, `±Infinity`, `'Infinity'`, `'0x10'`, BigInt, objects and arrays throw `invalid arr[3]: must be a valid number` (2D: `invalid mat[1][2]: must be a valid number`); none of them is treated as 0 or 1. Before, `type: 'pow2'` concatenated numeric strings (`fft1d([1, '2', 3, 4], { type: 'pow2' })` had DC component 28 instead of 10) and treated `''`, `null` as 0 and `true` as 1, `type: 'dft'` leaked mathjs errors such as `Cannot convert "-" to Complex`, and `NaN` or `Infinity` turned the whole output into `NaN`.
+- **Data containers**: `arr` and `mat` must be non-empty arrays (empty arrays, non-arrays, array-like objects and typed arrays such as `Float64Array` throw `invalid arr: must be a non-empty array`). A matrix must be rectangular: every row an array as long as row 0 (before, shorter rows were padded with 0 and longer rows truncated). For `ifft1d` and `ifft2d` every element must be a `[re, im]` pair of valid numbers (before, a missing `im` or a plain number was read as 0, so `ifft1d([1, 2, 3, 4])` returned zeros).
+- **`dt`, `hzStart`, `hzEnd`**: valid numbers (numeric strings are converted); `dt` must be positive, `hzStart` and `hzEnd` non-negative. `Infinity`, `'Infinity'` and `'0x10'` are no longer accepted (give a large finite `hzEnd`, such as `1e9`, to pass all high frequencies). Messages changed from `dt[x] is not a positive number` to `invalid dt: must be a positive number`.
+- **`opt`**: must be a plain object, `undefined` or `null`; other values (numbers, strings, arrays, functions...) used to be ignored and now throw `invalid opt: must be an object`. Keys that are `undefined` or `null` take their defaults; keys that are given but invalid throw instead of silently falling back to the default.
+- **`opt.useOneTurn`** (`spectrum1d`, `spectrum2d`, `filter1d`, `filter2d`) must be `true` or `false`. Before, any truthy value was read as `true` (`'n'`, `'false'`, `1`...). **`opt.type`** must be `'dft'` or `'pow2'` (`null` now selects the default; before it threw); the message changed from `invalid type[abc]` to `invalid opt.type: must be one of 'dft', 'pow2'`.
+
 ## Installation
 
 ### Using npm(ES6 module):
@@ -88,6 +99,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.32/dist/w-fft.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.33/dist/w-fft.umd.js"></script>
 
 ```

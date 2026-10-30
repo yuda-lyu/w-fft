@@ -1,6 +1,6 @@
 {
   "name": "w-fft",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "main": "dist/w-fft.umd.js",
   "dependencies": {
     "mathjs": "^15.2.0",

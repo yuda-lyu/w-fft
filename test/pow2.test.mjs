@@ -124,9 +124,11 @@ describe(`type='pow2'`, function() {
         assert.strict.ok(maxdiff(fd, fp) < 1e-12)
     })
 
-    it(`should throw an error when type is invalid`, async function() {
-        assert.throws(() => wf.fft1d([1, 2, 3, 4], { type: 'abc' }), /invalid type\[abc\]/)
-        assert.throws(() => wf.fft2d([[1, 2], [3, 4]], { type: 'abc' }), /invalid type\[abc\]/)
+    it(`should throw an error without echoing the value when type is invalid`, async function() {
+
+        //spec(輸入參數之檢測機制 §3.4 S3, §6): 列舉外之type無效, 訊息格式`invalid <名稱>: must be <種類描述>`且不帶輸入值
+        assert.throws(() => wf.fft1d([1, 2, 3, 4], { type: 'abc' }), { message: `invalid opt.type: must be one of 'dft', 'pow2'` })
+        assert.throws(() => wf.fft2d([[1, 2], [3, 4]], { type: 'abc' }), { message: `invalid opt.type: must be one of 'dft', 'pow2'` })
     })
 
 })
