@@ -251,64 +251,44 @@ describe(`length-1 input (type='dft' vs type='pow2')`, function() {
 
     })
 
-    describe(`spectrum / filter with length 1 and 2`, function() {
+    //長度1之spectrum/filter不再回傳退化結果, 入口即拋錯(R-LEN-01), 其測試見unit-minlen.test.mjs; 此處只留長度2之filter與其餘之一致性
+    describe(`filter with length 2 and spectrum DC bin consistency (dft vs pow2)`, function() {
 
         it(`should pass the signal unchanged when filter1d all-pass (useOneTurn=false) with type='dft'`, async function() {
 
-            //spec: 帶通[0,hzEnd]涵蓋全部頻率時輸出等於輸入, n=1,2皆然(含長度1)
-            assert.strict.deepStrictEqual(wf.filter1d([5], 1, 0, 1e6, { useOneTurn: false }), [5])
+            //spec: 帶通[0,hzEnd]涵蓋全部頻率時輸出等於輸入, n=2(filter1d之最小長度)
             assert.strict.ok(maxdiff(wf.filter1d([5, 7], 1, 0, 1e6, { useOneTurn: false }), [5, 7]) < 1e-12)
         })
 
         it(`should pass the signal unchanged in the first n points when filter1d all-pass (useOneTurn=false) with type='pow2'`, async function() {
 
             //spec: 帶通涵蓋全部頻率時輸出等於輸入; 'pow2'輸出為補零後之4點, 前n點為輸入, 其後為0
-            assert.strict.ok(maxdiff(wf.filter1d([5], 1, 0, 1e6, { useOneTurn: false, type: 'pow2' }), [5, 0, 0, 0]) < 1e-12)
             assert.strict.ok(maxdiff(wf.filter1d([5, 7], 1, 0, 1e6, { useOneTurn: false, type: 'pow2' }), [5, 7, 0, 0]) < 1e-12)
         })
 
-        for (let [m, n] of [[1, 1], [1, 2], [2, 1], [2, 2]]) {
-            it(`should pass the matrix unchanged when filter2d all-pass (useOneTurn=false) ${m}x${n} with both types`, async function() {
+        it(`should pass the matrix unchanged when filter2d all-pass (useOneTurn=false) 2x2 with both types`, async function() {
 
-                //spec: 帶通涵蓋全部頻率時輸出等於輸入(含任一軸長度1); 'pow2'輸出為補零後之4×4, 左上m×n為輸入, 其餘為0
-                let mat = mkMat(m, n)
-                let rd = wf.filter2d(mat, 1, 0, 1e6, { useOneTurn: false })
-                assert.strict.ok(maxdiff(rd, mat) < 1e-9)
-                let rp = wf.filter2d(mat, 1, 0, 1e6, { useOneTurn: false, type: 'pow2' })
-                let exp = Array.from({ length: 4 }, (_, i) => Array.from({ length: 4 }, (_, j) => (i < m && j < n) ? mat[i][j] : 0))
-                assert.strict.ok(maxdiff(rp, exp) < 1e-9)
-            })
-        }
-
-        it(`should return the same DC bin in dft and pow2 when spectrum1d / spectrum2d n=2 (useOneTurn=false)`, async function() {
-
-            //spec: 頻譜首點為直流分量(freq=0, 值為Σ x), dft與pow2一致
-            let sd = wf.spectrum1d([5, 7], 1, { useOneTurn: false })
-            let sp = wf.spectrum1d([5, 7], 1, { useOneTurn: false, type: 'pow2' })
-            assert.strict.deepStrictEqual(sd[0], { freq: 0, real: 12, imag: 0, ampl: 12 })
-            assert.strict.deepStrictEqual(sp[0], { freq: 0, real: 12, imag: 0, ampl: 12 })
-            let mat = [[1, 2], [3, 4]]
-            let s2d = wf.spectrum2d(mat, 1, { useOneTurn: false })
-            let s2p = wf.spectrum2d(mat, 1, { useOneTurn: false, type: 'pow2' })
-            assert.strict.deepStrictEqual(s2d[0][0], { freqRow: 0, freqCol: 0, real: 10, imag: 0, ampl: 10 })
-            assert.strict.deepStrictEqual(s2p[0][0], { freqRow: 0, freqCol: 0, real: 10, imag: 0, ampl: 10 })
+            //spec: 帶通涵蓋全部頻率時輸出等於輸入, 2x2(filter2d之最小長度); 'pow2'輸出為補零後之4×4, 左上2×2為輸入, 其餘為0
+            let mat = mkMat(2, 2)
+            let rd = wf.filter2d(mat, 1, 0, 1e6, { useOneTurn: false })
+            assert.strict.ok(maxdiff(rd, mat) < 1e-9)
+            let rp = wf.filter2d(mat, 1, 0, 1e6, { useOneTurn: false, type: 'pow2' })
+            let exp = Array.from({ length: 4 }, (_, i) => Array.from({ length: 4 }, (_, j) => (i < 2 && j < 2) ? mat[i][j] : 0))
+            assert.strict.ok(maxdiff(rp, exp) < 1e-9)
         })
 
-        it(`should only return finite numbers in every field when spectrum1d / spectrum2d length 1 (both types, both useOneTurn)`, async function() {
+        it(`should return the same DC bin in dft and pow2 when spectrum1d n=4 / spectrum2d 4x4 (useOneTurn=false)`, async function() {
 
-            //spec: 頻譜各欄(freq,real,imag,ampl)皆為有限數字, 不出現NaN/undefined
-            let cells = []
-            for (let type of ['dft', 'pow2']) {
-                for (let useOneTurn of [true, false]) {
-                    cells.push(...wf.spectrum1d([5], 1, { type, useOneTurn }))
-                    cells.push(...wf.spectrum2d([[5]], 1, { type, useOneTurn }).flat())
-                }
-            }
-            for (let c of cells) {
-                for (let v of Object.values(c)) {
-                    assert.strict.ok(typeof v === 'number' && Number.isFinite(v))
-                }
-            }
+            //spec: 頻譜首點為直流分量(freq=0, 值為Σ x), dft與pow2一致; 4點與4×4為spectrum之最小長度, 且與其2冪次補零後點數相同
+            let sd = wf.spectrum1d([5, 7, 1, 3], 1, { useOneTurn: false })
+            let sp = wf.spectrum1d([5, 7, 1, 3], 1, { useOneTurn: false, type: 'pow2' })
+            assert.strict.deepStrictEqual(sd[0], { freq: 0, real: 16, imag: 0, ampl: 16 })
+            assert.strict.deepStrictEqual(sp[0], { freq: 0, real: 16, imag: 0, ampl: 16 })
+            let mat = [[1, 2, 3, 4], [3, 4, 5, 6], [0, 1, 0, 1], [2, 2, 2, 2]]
+            let s2d = wf.spectrum2d(mat, 1, { useOneTurn: false })
+            let s2p = wf.spectrum2d(mat, 1, { useOneTurn: false, type: 'pow2' })
+            assert.strict.deepStrictEqual(s2d[0][0], { freqRow: 0, freqCol: 0, real: 38, imag: 0, ampl: 38 })
+            assert.strict.deepStrictEqual(s2p[0][0], { freqRow: 0, freqCol: 0, real: 38, imag: 0, ampl: 38 })
         })
 
     })

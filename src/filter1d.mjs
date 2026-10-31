@@ -2,7 +2,7 @@ import size from 'lodash-es/size.js'
 import each from 'lodash-es/each.js'
 import range from 'lodash-es/range.js'
 import _fft1d from './_fft1d.mjs'
-import { chkArr, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
+import { chkArr, chkMinLen, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
 
 
 /**
@@ -10,7 +10,7 @@ import { chkArr, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
  *
  * 輸入參數皆於入口先檢測(dft與pow2兩路徑一致)，依參數順序由左至右，無效時同步throw Error，訊息不帶輸入值。
  *
- * @param {Array} arr 輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如`invalid arr[3]: must be a valid number`)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error
+ * @param {Array} arr 輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如`invalid arr[3]: must be a valid number`)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error。長度須至少2點(帶通須能區分直流與非直流頻率；長度1時，useOneTurn為true之週期(n-1)*dt為0、頻率為NaN而輸出恆為0，useOneTurn為false則只有直流bin、頻帶無從界定)，不足throw Error(`invalid arr: must be an array with at least 2 elements`)，dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前
  * @param {Number} dt 輸入數據點時間間隔數字，單位s，種類為有效數字(正數)：有限數字或數字字串(轉換後才使用)且須大於0，未給、非數字、0、負數、Infinity、'0x10'等throw Error(`invalid dt: must be a positive number`)
  * @param {Number} hzStart 輸入過濾用帶通頻率下限數字，單位Hz，種類為有效數字(非負數)：有限數字或數字字串(轉換後才使用)且須大於等於0，未給、非數字、負數、Infinity、'0x10'等throw Error(`invalid hzStart: must be a non-negative number`)
  * @param {Number} hzEnd 輸入過濾用帶通頻率上限數字，單位Hz，種類為有效數字(非負數)：有限數字或數字字串(轉換後才使用)且須大於等於0，未給、非數字、負數、Infinity(需通過全部高頻時請給足夠大之有限數)、'0x10'等throw Error(`invalid hzEnd: must be a non-negative number`)
@@ -229,6 +229,9 @@ function filter1d(arr, dt, hzStart, hzEnd, opt = {}) {
 
     //check arr, 元素為有效數字, 轉換後才使用
     let vs = chkArr(arr, 'arr')
+
+    //check 長度, 至少2點(需有非直流bin, 帶通才能區分直流與非直流), 不足throw
+    chkMinLen(vs, 'arr', 2)
 
     //check dt, 有效數字(正數), 轉換後才使用
     dt = chkNum(dt, 'dt', 'positive')

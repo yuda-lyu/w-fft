@@ -3,6 +3,7 @@
 import assert from 'assert'
 import wf from '../src/WFft.mjs'
 import { parseN2 } from '../src/_chkParam.mjs'
+import expectInvalid from './tools/expectInvalid.mjs'
 
 
 //規格: 跨套件之[輸入參數之檢測機制](輸入參數之檢測機制.md), 本檔為其§8測試矩陣之翻譯
@@ -11,16 +12,6 @@ import { parseN2 } from '../src/_chkParam.mjs'
 //  B1布林(§3.3): 只收true/false
 //  S3列舉字串、opt(§4): undefined與null取預設, 給了而無效即throw, 不得靜默改用預設(K3)
 //  失敗通道(§5.1): 同步數值計算throw Error; 訊息(§6): `invalid <名稱>: must be <種類描述>`, 不回顯輸入值(K9)
-
-
-//斷言同步throw Error且訊息全文相符(訊息為固定詞彙, 全文相符即不帶輸入值, 亦非mathjs等內部錯誤)
-function expectInvalid(fn, msg) {
-    assert.throws(fn, (err) => {
-        assert.strict.ok(err instanceof Error)
-        assert.strict.deepStrictEqual(err.message, msg)
-        return true
-    })
-}
 
 
 //dft與pow2兩路徑對同一輸入須有一致之檢測與錯誤
@@ -85,6 +76,12 @@ let shapes = {
         build: (v) => [v.slice(0, 4), v.slice(4, 8)],
         path: (p) => `mat[${Math.floor(p / 4)}][${p % 4}]`,
     },
+    //spectrum2d須各軸至少4點(R-LEN-01): 4列×4行, 第0,1列為v之前後各4個數值, 第2,3列重複之; 第p(<8)個數值被替換時, 列優先掃描之第一個無效元素仍為第p個
+    '2dq': {
+        data: 'mat',
+        build: (v) => [v.slice(0, 4), v.slice(4, 8), v.slice(0, 4), v.slice(4, 8)],
+        path: (p) => `mat[${Math.floor(p / 4)}][${p % 4}]`,
+    },
     '2dc': {
         data: 'mat',
         build: (v) => [[[v[0], v[1]], [v[2], v[3]]], [[v[4], v[5]], [v[6], v[7]]]],
@@ -101,7 +98,7 @@ let entries = [
     { name: 'filter1d', shape: '1d', call: (d, opt) => wf.filter1d(d, 1, 0, 0.3, opt), hasDt: true, hasHz: true, hasOneTurn: true },
     { name: 'fft2d', shape: '2d', call: (d, opt) => wf.fft2d(d, opt) },
     { name: 'ifft2d', shape: '2dc', call: (d, opt) => wf.ifft2d(d, opt) },
-    { name: 'spectrum2d', shape: '2d', call: (d, opt) => wf.spectrum2d(d, 1, opt), hasDt: true, hasOneTurn: true },
+    { name: 'spectrum2d', shape: '2dq', call: (d, opt) => wf.spectrum2d(d, 1, opt), hasDt: true, hasOneTurn: true },
     { name: 'filter2d', shape: '2d', call: (d, opt) => wf.filter2d(d, 1, 0, 0.3, opt), hasDt: true, hasHz: true, hasOneTurn: true },
 ]
 
@@ -301,7 +298,7 @@ describe(`2D matrix structure`, function() {
 describe(`dt, hzStart and hzEnd`, function() {
 
     let arr = numVals
-    let mat = shapes['2d'].build(numVals)
+    let mat = shapes['2dq'].build(numVals)
     let calls = {
         spectrum1d: (dt, hs, he, opt) => wf.spectrum1d(arr, dt, opt),
         filter1d: (dt, hs, he, opt) => wf.filter1d(arr, dt, hs, he, opt),
@@ -551,12 +548,14 @@ describe(`opt.useOneTurn`, function() {
     })
 
     it(`should use period (len-1)*dt for true and len*dt for false when spectrum2d`, async function() {
-        //spec: 各軸點數m=2,n=4, dt=1 => true: dfRow=1/1, dfCol=1/3; false: dfRow=1/2, dfCol=1/4
-        let mat = shapes['2d'].build(numVals)
+        //spec: 各軸點數m=4,n=4, dt=1 => true: dfRow=1/3, dfCol=1/3; false: dfRow=1/4, dfCol=1/4
+        let mat = shapes['2dq'].build(numVals)
         let rt = wf.spectrum2d(mat, 1, { useOneTurn: true })
         let rf = wf.spectrum2d(mat, 1, { useOneTurn: false })
         assert.strict.deepStrictEqual(1 / 3, rt[0][1].freqCol)
         assert.strict.deepStrictEqual(1 / 4, rf[0][1].freqCol)
+        assert.strict.deepStrictEqual(1 / 3, rt[1][0].freqRow)
+        assert.strict.deepStrictEqual(1 / 4, rf[1][0].freqRow)
     })
 
     it(`should change the passband mask between true and false when filter1d`, async function() {

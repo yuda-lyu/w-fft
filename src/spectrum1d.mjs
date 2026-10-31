@@ -3,7 +3,7 @@ import each from 'lodash-es/each.js'
 import range from 'lodash-es/range.js'
 import take from 'lodash-es/take.js'
 import _fft1d from './_fft1d.mjs'
-import { chkArr, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
+import { chkArr, chkMinLen, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
 
 
 /**
@@ -11,7 +11,7 @@ import { chkArr, chkNum, chkOpt, optType, optUseOneTurn } from './_chkParam.mjs'
  *
  * 輸入參數皆於入口先檢測(dft與pow2兩路徑一致)，依參數順序由左至右，無效時同步throw Error，訊息不帶輸入值。
  *
- * @param {Array} arr 輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如`invalid arr[3]: must be a valid number`)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error
+ * @param {Array} arr 輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如`invalid arr[3]: must be a valid number`)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error。長度須至少4點(以dft計，輸出為正頻半部floor(n/2)點，至少4點才含非直流頻率點；長度1回空陣列、長度2與3只有直流點，皆不是有意義之頻譜)，不足throw Error(`invalid arr: must be an array with at least 4 elements`)，dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前
  * @param {Number} dt 時間間隔，單位s，種類為有效數字(正數)：有限數字或數字字串(轉換後才使用)且須大於0，未給、非數字、0、負數、Infinity、'0x10'等throw Error(`invalid dt: must be a positive number`)
  * @param {Object} [opt={}] 選項物件，種類為一般物件，undefined或null視為未給，其他非一般物件(如陣列、函數、Date)throw Error(`invalid opt: must be an object`)
  * @param {Boolean} [opt.useOneTurn=true] true=輸入視為一個完整週期(頭尾重複)，週期(n-1)*dt；false=標準DFT，週期n*dt。種類為布林(只收true或false)，undefined或null取預設，給了而非布林(如'n'、'false'、0、1)throw Error(`invalid opt.useOneTurn: must be a boolean`)，不以真值判定
@@ -35,6 +35,9 @@ function spectrum1d(arr, dt, opt = {}) {
 
     //check arr, 元素為有效數字, 轉換後才使用
     let vs = chkArr(arr, 'arr')
+
+    //check 長度, 至少4點(輸出floor(n/2)點, 需含非直流點才有頻率軸), 不足throw
+    chkMinLen(vs, 'arr', 4)
 
     //check dt, 有效數字(正數), 轉換後才使用
     dt = chkNum(dt, 'dt', 'positive')

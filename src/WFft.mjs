@@ -20,6 +20,9 @@ import filter2d from './filter2d.mjs'
  * dt、hzStart、hzEnd為有效數字(dt須為正數，頻率須為非負數)；opt.useOneTurn為布林(只收true或false)，opt.type為列舉字串('dft'或'pow2')，opt為一般物件，
  * opt之鍵為undefined或null取預設，給了而無效即throw Error，不靜默改用預設。詳見各函數說明。
  *
+ * 最小輸入長度：輸入長度不足以產生有意義之頻譜或濾波結果時，入口即throw Error(`invalid arr: must be an array with at least N elements`；二維為`invalid mat: must be an array with at least N rows`或`invalid mat[0]: must be an array with at least N columns`)，dft與pow2一致，以輸入長度判定而非補零後點數。
+ * spectrum1d至少4點、spectrum2d列數與行數各至少4點(須含非直流頻率點)；filter1d至少2點、filter2d列數與行數各至少2點(須含非直流bin)；fft1d、ifft1d、fft2d、ifft2d長度1為正確之1點DFT，不拒絕。
+ *
  * @returns {Array} 回傳數據陣列
  * @example
  *

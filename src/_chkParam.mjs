@@ -144,6 +144,26 @@ function chkMatCplx(mat, name) {
 }
 
 
+//1D資料陣列之最小長度, 於chkArr之後呼叫(資料結構與元素先於長度); 長度不足以產生有意義之頻譜或濾波結果, 入口即throw, 訊息不帶值
+//最小長度依各函數演算法而定(見sgud/rule/rulebook.md R-LEN-01), 由呼叫端傳入
+function chkMinLen(vs, name, min) {
+    if (vs.length < min) {
+        throw new Error(`invalid ${name}: must be an array with at least ${min} elements`)
+    }
+}
+
+
+//2D資料矩陣之各軸最小長度, 於chkMat之後呼叫(vs為矩形, 第0列非空); 先列後行, 訊息寫明哪一維(列為name, 行為name[0]), 不帶值
+function chkMinShape(vs, name, minRows, minCols) {
+    if (vs.length < minRows) {
+        throw new Error(`invalid ${name}: must be an array with at least ${minRows} rows`)
+    }
+    if (vs[0].length < minCols) {
+        throw new Error(`invalid ${name}[0]: must be an array with at least ${minCols} columns`)
+    }
+}
+
+
 //O1一般物件, 原型為Object.prototype或null(跨realm者以原型之原型為null判定); 陣列,Date,Map,類別實例,函數,null皆非
 function isObj(o) {
     try {
@@ -211,4 +231,4 @@ function optUseOneTurn(opt) {
 }
 
 
-export { parseN2, chkNum, chkArr, chkArrCplx, chkMat, chkMatCplx, chkOpt, optType, optUseOneTurn }
+export { parseN2, chkNum, chkArr, chkArrCplx, chkMat, chkMatCplx, chkMinLen, chkMinShape, chkOpt, optType, optUseOneTurn }

@@ -17,10 +17,25 @@ To view some examples for more understanding, visit examples:
 
 ## Breaking changes
 
-### Length-1 input with `type: 'dft'` (next release)
-`fft1d([5])` and `fft2d([[5]])` with `type: 'dft'` (the default) used to return `[[undefined, undefined]]` and `[[[undefined, undefined]]]` (shown as `null` in JSON): mathjs `fft` hands back the single element as a plain number instead of a complex object, and the `.re`/`.im` of a number are `undefined`. They now return the true 1-point DFT, `[[5, 0]]` and `[[[5, 0]]]`; `type: 'pow2'` was already correct (zero-padded to 4 points, every bin equals 5). Knock-on: `filter1d` and `filter2d` with `useOneTurn: false` on a length-1 input used to return `0` and now return the input (`filter1d([5], 1, 0, 1, { useOneTurn: false })` is `[5]`). `ifft1d`/`ifft2d` were already correct for length 1. Unchanged for `type: 'dft'`: `spectrum1d`/`spectrum2d` return no spectrum points for a length-1 input (an empty array; in 2D, when either axis has length 1, an empty array or rows of empty arrays such as `[[], []]` for a 5×1 matrix), because the positive-frequency half has `floor(n/2) = 0` points; and with `useOneTurn: true` (the default) `filter1d`/`filter2d` return 0 for a length-1 input, because its period `(n-1)*dt` is 0.
+### Too-short input to `spectrum1d`, `spectrum2d`, `filter1d` and `filter2d` (next release)
+An input too short to give a meaningful spectrum or filter result now throws a synchronous `Error` at the entry, identically for `type: 'dft'` and `type: 'pow2'` and for both values of `opt.useOneTurn`. Before, such inputs returned degenerate results (an empty array, a spectrum with only the DC point, an all-zero output) without any error. The length checked is the length of the input, not the zero-padded length of `type: 'pow2'`. The message never contains the input value.
 
-### Input validation (next release)
+| Function | Minimum length | Message |
+|---|---|---|
+| `spectrum1d(arr, ...)` | `arr`: 4 | `invalid arr: must be an array with at least 4 elements` |
+| `filter1d(arr, ...)` | `arr`: 2 | `invalid arr: must be an array with at least 2 elements` |
+| `spectrum2d(mat, ...)` | `mat`: 4 rows and 4 columns | `invalid mat: must be an array with at least 4 rows`, `invalid mat[0]: must be an array with at least 4 columns` |
+| `filter2d(mat, ...)` | `mat`: 2 rows and 2 columns | `invalid mat: must be an array with at least 2 rows`, `invalid mat[0]: must be an array with at least 2 columns` |
+
+- **Why 4 for the spectrum**: the spectrum is the positive-frequency half, `floor(n/2)` points. Length 1 returned `[]` (in 2D, an empty array or rows of empty arrays such as `[[], []]` for a 5×1 matrix) and lengths 2 and 3 returned only the DC point, so at least 4 points are needed to get one non-DC frequency. In 2D each axis needs them: with fewer, the frequency of that axis is always 0.
+- **Why 2 for the filter**: the pass band separates the DC bin from the other bins, so there must be a non-DC bin. With `useOneTurn: true` (the default) a length-1 axis has the period `(n-1)*dt` = 0, its frequencies are `NaN`, and the output was all 0 (in 2D this happened whenever either axis had length 1, even if the other axis was long). With `useOneTurn: false` a length-1 axis has only the DC bin, so no band can be defined (a 1×N or N×1 matrix was just a 1D filter in disguise: call `filter1d` for a single row or column).
+- **Order of checks**: the data content (container, structure, elements) comes first, then the length (2D: rows before columns), then `dt`, `hzStart`, `hzEnd` and `opt`; so an invalid element is still reported as `invalid arr[3]: must be a valid number`, and an empty array as `invalid arr: must be a non-empty array`.
+- **Not changed**: `fft1d`, `ifft1d`, `fft2d` and `ifft2d` accept length 1 (the true 1-point DFT).
+
+### Length-1 input with `type: 'dft'` (1.0.34)
+`fft1d([5])` and `fft2d([[5]])` with `type: 'dft'` (the default) used to return `[[undefined, undefined]]` and `[[[undefined, undefined]]]` (shown as `null` in JSON): mathjs `fft` hands back the single element as a plain number instead of a complex object, and the `.re`/`.im` of a number are `undefined`. They now return the true 1-point DFT, `[[5, 0]]` and `[[[5, 0]]]`; `type: 'pow2'` was already correct (zero-padded to 4 points, every bin equals 5). Knock-on: `filter1d` and `filter2d` with `useOneTurn: false` on a length-1 input used to return `0` and now return the input (`filter1d([5], 1, 0, 1, { useOneTurn: false })` is `[5]`). `ifft1d`/`ifft2d` were already correct for length 1. In 1.0.34, unchanged for `type: 'dft'` (these inputs throw in the next release, see above): `spectrum1d`/`spectrum2d` return no spectrum points for a length-1 input (an empty array; in 2D, when either axis has length 1, an empty array or rows of empty arrays such as `[[], []]` for a 5×1 matrix), because the positive-frequency half has `floor(n/2) = 0` points; and with `useOneTurn: true` (the default) `filter1d`/`filter2d` return 0 for a length-1 input, because its period `(n-1)*dt` is 0.
+
+### Input validation (1.0.34)
 Every public function (`fft1d`, `ifft1d`, `fft2d`, `ifft2d`, `spectrum1d`, `spectrum2d`, `filter1d`, `filter2d`) now validates all inputs at the entry, identically for `type: 'dft'` and `type: 'pow2'`. Invalid input throws a synchronous `Error` with the message `invalid <name>: must be <description>`; the message never contains the input value. Inputs that were silently accepted, coerced or replaced by defaults before now throw:
 
 - **Data elements must be valid numbers**: a finite number or a numeric string (decimal notation such as `'12'`, `' 12 '`, `'1.2e-5'`), converted to a number before computing. `'-'`, `'NP'`, `''`, `null`, `undefined`, booleans, `NaN`, `±Infinity`, `'Infinity'`, `'0x10'`, BigInt, objects and arrays throw `invalid arr[3]: must be a valid number` (2D: `invalid mat[1][2]: must be a valid number`); none of them is treated as 0 or 1. Before, `type: 'pow2'` concatenated numeric strings (`fft1d([1, '2', 3, 4], { type: 'pow2' })` had DC component 28 instead of 10) and treated `''`, `null` as 0 and `true` as 1, `type: 'dft'` leaked mathjs errors such as `Cannot convert "-" to Complex`, and `NaN` or `Infinity` turned the whole output into `NaN`.
@@ -102,6 +117,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.34/dist/w-fft.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.35/dist/w-fft.umd.js"></script>
 
 ```

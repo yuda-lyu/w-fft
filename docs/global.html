@@ -141,13 +141,15 @@
 <p>輸入參數檢測：各函數之輸入參數皆於入口先檢測(dft與pow2兩路徑一致)，無效時同步throw Error，訊息格式為<code>invalid &lt;名稱&gt;: must be &lt;種類描述&gt;</code>且不帶輸入值。
 數據陣列(含二維矩陣)之元素種類為有效數字：有限數字或數字字串(轉換為數字後才運算)，非數字(含'-'、'NP'、''、null、布林、NaN、Infinity)一律無效，不視為0；
 dt、hzStart、hzEnd為有效數字(dt須為正數，頻率須為非負數)；opt.useOneTurn為布林(只收true或false)，opt.type為列舉字串('dft'或'pow2')，opt為一般物件，
-opt之鍵為undefined或null取預設，給了而無效即throw Error，不靜默改用預設。詳見各函數說明。</p></li></ul></dd>
+opt之鍵為undefined或null取預設，給了而無效即throw Error，不靜默改用預設。詳見各函數說明。</p>
+<p>最小輸入長度：輸入長度不足以產生有意義之頻譜或濾波結果時，入口即throw Error(<code>invalid arr: must be an array with at least N elements</code>；二維為<code>invalid mat: must be an array with at least N rows</code>或<code>invalid mat[0]: must be an array with at least N columns</code>)，dft與pow2一致，以輸入長度判定而非補零後點數。
+spectrum1d至少4點、spectrum2d列數與行數各至少4點(須含非直流頻率點)；filter1d至少2點、filter2d列數與行數各至少2點(須含非直流bin)；fft1d、ifft1d、fft2d、ifft2d長度1為正確之1點DFT，不拒絕。</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line83">line 83</a>
+        <a href="WFft.mjs.html">WFft.mjs</a>, <a href="WFft.mjs.html#line86">line 86</a>
     </li></ul></dd>
     
 
@@ -195,6 +197,8 @@ opt之鍵為undefined或null取預設，給了而無效即throw Error，不靜�
 數據陣列(含二維矩陣)之元素種類為有效數字：有限數字或數字字串(轉換為數字後才運算)，非數字(含'-'、'NP'、''、null、布林、NaN、Infinity)一律無效，不視為0；
 dt、hzStart、hzEnd為有效數字(dt須為正數，頻率須為非負數)；opt.useOneTurn為布林(只收true或false)，opt.type為列舉字串('dft'或'pow2')，opt為一般物件，
 opt之鍵為undefined或null取預設，給了而無效即throw Error，不靜默改用預設。詳見各函數說明。</p>
+<p>最小輸入長度：輸入長度不足以產生有意義之頻譜或濾波結果時，入口即throw Error(<code>invalid arr: must be an array with at least N elements</code>；二維為<code>invalid mat: must be an array with at least N rows</code>或<code>invalid mat[0]: must be an array with at least N columns</code>)，dft與pow2一致，以輸入長度判定而非補零後點數。
+spectrum1d至少4點、spectrum2d列數與行數各至少4點(須含非直流頻率點)；filter1d至少2點、filter2d列數與行數各至少2點(須含非直流bin)；fft1d、ifft1d、fft2d、ifft2d長度1為正確之1點DFT，不拒絕。</p>
 </div>
 
 
@@ -1062,7 +1066,7 @@ console.log(res)
                 </td>
             
 
-            <td class="description last"><p>輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如<code>invalid arr[3]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error</p></td>
+            <td class="description last"><p>輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如<code>invalid arr[3]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error。長度須至少2點(帶通須能區分直流與非直流頻率；長度1時，useOneTurn為true之週期(n-1)*dt為0、頻率為NaN而輸出恆為0，useOneTurn為false則只有直流bin、頻帶無從界定)，不足throw Error(<code>invalid arr: must be an array with at least 2 elements</code>)，dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前</p></td>
         </tr>
 
     
@@ -1500,7 +1504,7 @@ console.log(res)
                 </td>
             
 
-            <td class="description last"><p>輸入二維實數矩陣，種類為二維資料陣列(元素為有效數字)：須為非空之矩形陣列(各列皆為陣列且長度等於第0列，第0列不可為空，不補0亦不截斷)，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶兩層索引(如<code>invalid mat[1][2]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)、空陣列與非矩形亦throw Error</p></td>
+            <td class="description last"><p>輸入二維實數矩陣，種類為二維資料陣列(元素為有效數字)：須為非空之矩形陣列(各列皆為陣列且長度等於第0列，第0列不可為空，不補0亦不截斷)，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶兩層索引(如<code>invalid mat[1][2]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)、空陣列與非矩形亦throw Error。列數與行數(各軸)皆須至少2點(帶通須能區分直流與非直流頻率；任一軸長度1時，useOneTurn為true該軸之週期(len-1)*dt為0、頻率為NaN而輸出恆為0，useOneTurn為false則該軸退化而不成二維)，不足throw Error，列數不足為<code>invalid mat: must be an array with at least 2 rows</code>，行數(mat[0]之長度)不足為<code>invalid mat[0]: must be an array with at least 2 columns</code>，兩者皆不足時先報列；dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前</p></td>
         </tr>
 
     
@@ -2575,7 +2579,7 @@ console.log(res)
                 </td>
             
 
-            <td class="description last"><p>輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如<code>invalid arr[3]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error</p></td>
+            <td class="description last"><p>輸入數據陣列，種類為資料陣列(元素為有效數字)：陣列須非空，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶索引(如<code>invalid arr[3]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)與空陣列亦throw Error。長度須至少4點(以dft計，輸出為正頻半部floor(n/2)點，至少4點才含非直流頻率點；長度1回空陣列、長度2與3只有直流點，皆不是有意義之頻譜)，不足throw Error(<code>invalid arr: must be an array with at least 4 elements</code>)，dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前</p></td>
         </tr>
 
     
@@ -2941,7 +2945,7 @@ console.log(res)
                 </td>
             
 
-            <td class="description last"><p>輸入二維實數矩陣，種類為二維資料陣列(元素為有效數字)：須為非空之矩形陣列(各列皆為陣列且長度等於第0列，第0列不可為空，不補0亦不截斷)，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶兩層索引(如<code>invalid mat[1][2]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)、空陣列與非矩形亦throw Error</p></td>
+            <td class="description last"><p>輸入二維實數矩陣，種類為二維資料陣列(元素為有效數字)：須為非空之矩形陣列(各列皆為陣列且長度等於第0列，第0列不可為空，不補0亦不截斷)，各元素須為有限數字或數字字串(如'2'、' 2 '、'1.2e-5')，數字字串轉換為數字後才運算；非數字字串(含'-'、'NP'、'')、null、undefined、布林、NaN、Infinity、'0x10'等皆無效，不視為0或1；任一元素無效即throw Error，訊息帶兩層索引(如<code>invalid mat[1][2]: must be a valid number</code>)；非陣列(含類陣列物件、TypedArray)、空陣列與非矩形亦throw Error。列數與行數(各軸)皆須至少4點(以dft計，輸出為正頻半象限floor(m/2)×floor(n/2)點，任一軸不足4點則該軸之頻率恆為0、無該軸之頻率資訊，長度1則為空)，不足throw Error，列數不足為<code>invalid mat: must be an array with at least 4 rows</code>，行數(mat[0]之長度)不足為<code>invalid mat[0]: must be an array with at least 4 columns</code>，兩者皆不足時先報列；dft與pow2一致，以輸入長度判定而非補零後點數；此檢查於元素檢測之後、dt之前</p></td>
         </tr>
 
     
@@ -3195,7 +3199,7 @@ console.log(res)
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 10:32:40 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Oct 31 2026 12:37:33 GMT+0800 (台北標準時間) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
