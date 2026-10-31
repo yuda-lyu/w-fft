@@ -1,11 +1,11 @@
 {
   "name": "w-fft",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "main": "dist/w-fft.umd.js",
   "dependencies": {
     "mathjs": "^15.2.0",
     "ml-fft": "^1.3.5",
-    "wsemi": "^1.9.33"
+    "wsemi": "^1.9.36"
   },
   "devDependencies": {
     "w-package-tools": "^1.1.21"
