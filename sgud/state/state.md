@@ -6,18 +6,18 @@
 
 | 功能 | 狀態 | 規則帳本 | 測試檔 |
 |---|---|---|---|
-| `fft1d`、`ifft1d`(`type:'dft'` mathjs 真實 n 點、`'pow2'` 補零至 2 冪次) | 完成 | R-PARAM-01 | `test/fft1d.test.mjs`、`test/ifft1d.test.mjs`、`test/pow2.test.mjs`、`test/unit-param.test.mjs` |
-| `fft2d`、`ifft2d` | 完成 | R-PARAM-01 | `test/fft2d.test.mjs`、`test/ifft2d.test.mjs`、`test/pow2.test.mjs`、`test/unit-param.test.mjs` |
+| `fft1d`、`ifft1d`(`type:'dft'` mathjs 真實 n 點、`'pow2'` 補零至 2 冪次) | 完成 | R-PARAM-01、R-DFT-01 | `test/fft1d.test.mjs`、`test/ifft1d.test.mjs`、`test/pow2.test.mjs`、`test/unit-param.test.mjs`、`test/unit-len1.test.mjs` |
+| `fft2d`、`ifft2d` | 完成 | R-PARAM-01、R-DFT-01 | `test/fft2d.test.mjs`、`test/ifft2d.test.mjs`、`test/pow2.test.mjs`、`test/unit-param.test.mjs`、`test/unit-len1.test.mjs` |
 | `spectrum1d`、`spectrum2d` | 完成 | R-PARAM-01 | `test/spectrum1d_*.test.mjs`、`test/spectrum2d.test.mjs`、`test/unit-param.test.mjs` |
 | `filter1d`、`filter2d`(帶通) | 完成 | R-PARAM-01 | `test/filter1d_*.test.mjs`、`test/filter2d.test.mjs`、`test/unit-param.test.mjs` |
 | 輸入參數檢測(全部 8 個對外函數,入口先檢、`dft`／`pow2` 一致、訊息不帶值) | 完成(2026-10-31,待發布) | R-PARAM-01 | `test/unit-param.test.mjs` |
+| `type:'dft'` 長度 1 之 `fft1d`／`fft2d`(1D 長度 1、2D 1×1)回 `[[x,0]]`／`[[[x,0]]]`;`dft` 與 `pow2` 對長度 1、2 之一致性 | 完成(2026-10-31,待發布) | R-DFT-01 | `test/unit-len1.test.mjs` |
 
 - 輸入參數檢測之實作集中於 `src/_chkParam.mjs`(本套件內之等價實作);**wsemi 共用檢測函數發布後改用之**(待辦,見 R-PARAM-01).
-- 驗證(2026-10-31):`npm test` 1046 passing(含既有 frozen 輸出測試 0 改變);變異測試 44 個殺死 42,存活 2 皆為等價變異;eslint 對改動檔 0 問題.
-- 破壞性變更:已寫入 README〈Breaking changes〉(未發布,`package.json` 之 version 仍為 1.0.32,由主控發布).
+- 驗證(2026-10-31):`npm test` 1091 passing(含既有 frozen 輸出測試 0 改變;新增 `unit-len1` 45 案);R-PARAM-01 變異測試 44 個殺死 42,存活 2 皆為等價變異;R-DFT-01 變異測試 14 個殺死 14;eslint 對改動檔 0 問題.
+- 破壞性變更:已寫入 README〈Breaking changes〉(未發布,`package.json` 之 version 為 1.0.33,由主控發布).
 
 ## 已知缺口與待辦
 
-- `type:'dft'` 且長度 1 之輸入(`fft1d([5])`、`fft2d([[5]])`)回 `NaN`(mathjs 15.2.0 之 `fft` 對長度 1 之結果;`'pow2'` 路徑正確):範圍外缺陷,另案處理(建議於 `_fft1dDft`／`_fft2dDft` 對長度 1 直接回 `[[x,0]]`).
-- 資料長度 1 且 `useOneTurn:true` 之 `spectrum1d`／`spectrum2d` 回空陣列、`hzStart > hzEnd` 不報錯、輸出溢位不檢:見 R-PARAM-01〈已知不處理〉.
+- 資料長度 1 之頻譜與週期(`type:'dft'`):`spectrum1d`／`spectrum2d` 對長度 1(2D 為任一軸長度 1)無正頻半部點、回空;`useOneTurn:true`(預設)時 `filter1d`／`filter2d` 對長度 1 回 0(週期 `(n-1)*dt` 為 0);規格未定,待裁示長度 1 是否報錯或視週期為 `dt`;另 `hzStart > hzEnd` 不報錯、輸出溢位不檢:見 R-PARAM-01〈已知不處理〉.
 - 是否收 TypedArray(`Float64Array` 等)為資料陣列:規格 A1 只收 `Array.isArray`,現依規格視為無效(舊版碰巧可用);如需收,須先改規格.

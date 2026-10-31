@@ -26,14 +26,15 @@ function _fft2dDft(mat, mode = 'norm') {
             cs.push(row)
         }
 
-        //fft, 回傳mathjs Complex物件之巢狀陣列
+        //fft, 回傳mathjs Complex物件之巢狀陣列; 但1×1時兩軸皆長度1, mathjs直接回傳原元素(number, 非Complex)
         let out = fft(cs)
 
-        //res, 每元素轉[re,im]
+        //res, 每元素以complex()統一轉為Complex後轉[re,im](1×1之number得[x, 0])
         for (let i = 0; i < m; i++) {
             let row = []
             for (let j = 0; j < n; j++) {
-                row.push([out[i][j].re, out[i][j].im])
+                let c = complex(out[i][j])
+                row.push([c.re, c.im])
             }
             res.push(row)
         }

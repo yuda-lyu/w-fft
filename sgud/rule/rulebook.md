@@ -45,10 +45,9 @@
 
 ### 已知不處理(本輪範圍外,現況保留)
 
-- 資料長度與 `useOneTurn` 之組合:`dft` 且長度 1 且 `useOneTurn:true` 時週期為 0,`spectrum1d`／`spectrum2d` 回空陣列(未報錯);非種類檢測,規格未定.
+- 資料長度 1 之頻譜與週期(`type:'dft'`;規格未定,非種類檢測):①`spectrum1d`／`spectrum2d` 對長度 1(2D 為任一軸長度 1)無正頻半部點(取 `floor(n/2)=0` 點):1D 回空陣列,2D 回空陣列或各列為空陣列(如 5×1 回 `[[],[]]`),`useOneTurn` 為 true／false 皆然;`pow2` 補零至 4 點故有點;②`useOneTurn:true`(預設)時週期 `(n-1)*dt` 為 0,頻率 `0*Infinity` 為 `NaN`,`filter1d`／`filter2d` 對長度 1 回 0(`pow2` 補零至 4 點故不同,回 `[5,0,0,0]`);`useOneTurn:false` 則 `filter` 對長度 1 回原值.待裁示:長度 1 時是否應報錯、或視週期為 `dt`.
 - `hzStart` 大於 `hzEnd`:不報錯,無頻率通過,輸出全 0;規格未定跨參數關係.
 - 輸出溢位:有限之大數輸入(如 1e308)使輸出為 `NaN`,不另檢查輸出.
-- `type:'dft'` 且長度 1(`fft1d([5])`、`fft2d([[5]])`)回 `NaN`(mathjs 15.2.0 之 `fft` 對長度 1 之結果,本輪實測;`type:'pow2'` 補零至 4 點後正確):範圍外缺陷,另案.
 
 ### 破壞性變更紀錄
 
@@ -59,3 +58,16 @@
 - 測試檔:`test/unit-param.test.mjs`(規格 §8 V24 矩陣之翻譯:數字類 31 種無效輸入 × 8 個函數 × 兩路徑;K4 數字字串輸入之結果與數值相同;資料陣列結構與索引;opt 非物件／`null`／`{}`／各鍵錯種類／`null` 取預設／存取器拋錯／凍結之 opt;布林矩陣)、`test/pow2.test.mjs` 之 type 無效案(訊息不帶值).
 - 全套:`npm test`;單檔:`node node_modules/mocha/bin/mocha.js --no-parallel test/unit-param.test.mjs --timeout 180000`.
 - 品質:變異測試 44 個變異殺死 42,存活 2 皆為等價變異(見 `sgud/exp/experience.md`).
+
+## R-DFT-01 `type:'dft'` 核心讀出 mathjs `fft` 結果須經 `complex()`
+
+**規則**:`_fft1dDft`／`_fft2dDft` 之正向(`norm`)讀出 mathjs `fft` 結果時,每個元素先以 `complex()` 轉為 Complex 再取 `.re`／`.im`.
+
+**why**:mathjs 之 `fft` 對長度 1 之軸直接回傳原元素(其 `_fft` 於 `len === 1` 回 `[arr[0]]`,為 number 而非 Complex),`out[i].re` 為 `undefined`;1D 之長度 1 與 2D 之 1×1(兩軸皆長度 1)必踩,其餘形狀因至少一軸之運算產生 Complex 而無事.本規則使 `fft1d([x])` 為 `[[x,0]]`、`fft2d([[x]])` 為 `[[[x,0]]]`,與 `pow2` 之直流 bin 一致.反向(`inv`)讀出之輸入皆以 `complex(re,im)` 建構,mathjs 回傳 Complex,不需轉換(以測試鎖定長度 1).
+
+- 盤點指令(於套件根):`git grep --untracked -n -E "\.(re|im)\b" -- src/_fft1dDft.mjs src/_fft2dDft.mjs`
+- 站點全集(4 處):`_fft1dDft` 正向(已套:`complex(out[i])`)、`_fft1dDft` 反向(刻意不套:輸入為 Complex)、`_fft2dDft` 正向(已套:`complex(out[i][j])`)、`_fft2dDft` 反向(刻意不套:輸入為 Complex).
+- 一致性關係(`dft` 與 `pow2` 對長度 1、2):`pow2` 補零至 N 點(最少 4 點),n 整除 N 時 `pow2` 之 bin `k*N/n` 等於 `dft` 之 bin k(1D;2D 兩軸各自);`ifft` 之輸出總和等於頻譜直流分量之實部(兩路徑皆然);`ifft(fft(x))` 之前 n 點為 x(`pow2` 其後為補零之 0);全通帶(`useOneTurn:false`、`hzStart:0`、大 `hzEnd`)之 `filter` 輸出等於輸入(`pow2` 左上 n 點為輸入、其餘為 0).
+- 測試:`test/unit-len1.test.mjs`(45 案;含樸素 DFT 預言對 1D n=1..9、2D 1..5×1..5 全形狀);單檔:`node node_modules/mocha/bin/mocha.js --no-parallel test/unit-len1.test.mjs --timeout 180000`;全套 `npm test`.
+- 品質:變異測試 14 個變異殺死 14,其中還原本規則之 4 個(M01～M04)只有 `unit-len1` 抓得到(舊測試不抓).
+- 破壞性變更(2026-10-31):`type:'dft'` 長度 1 之 `fft1d`／`fft2d` 由 `[[undefined,undefined]]` 改為 `[[x,0]]`;`useOneTurn:false` 之 `filter1d`／`filter2d` 對長度 1 由回 0 改為回原值;詳 README〈Breaking changes〉.

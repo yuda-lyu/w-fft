@@ -21,12 +21,13 @@ function _fft1dDft(arr, mode = 'norm') {
             cs[i] = get(arr, i, 0)
         }
 
-        //fft, 回傳mathjs Complex物件陣列(含re, im)
+        //fft, 回傳mathjs Complex物件陣列(含re, im); 但長度1時mathjs直接回傳原元素(number, 非Complex)
         let out = fft(cs)
 
-        //res
+        //res, 以complex()統一轉為Complex後再取re, im(長度1之number得[x, 0])
         for (let i = 0; i < n; i++) {
-            res.push([out[i].re, out[i].im])
+            let c = complex(out[i])
+            res.push([c.re, c.im])
         }
     }
     else {

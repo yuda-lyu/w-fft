@@ -17,6 +17,9 @@ To view some examples for more understanding, visit examples:
 
 ## Breaking changes
 
+### Length-1 input with `type: 'dft'` (next release)
+`fft1d([5])` and `fft2d([[5]])` with `type: 'dft'` (the default) used to return `[[undefined, undefined]]` and `[[[undefined, undefined]]]` (shown as `null` in JSON): mathjs `fft` hands back the single element as a plain number instead of a complex object, and the `.re`/`.im` of a number are `undefined`. They now return the true 1-point DFT, `[[5, 0]]` and `[[[5, 0]]]`; `type: 'pow2'` was already correct (zero-padded to 4 points, every bin equals 5). Knock-on: `filter1d` and `filter2d` with `useOneTurn: false` on a length-1 input used to return `0` and now return the input (`filter1d([5], 1, 0, 1, { useOneTurn: false })` is `[5]`). `ifft1d`/`ifft2d` were already correct for length 1. Unchanged for `type: 'dft'`: `spectrum1d`/`spectrum2d` return no spectrum points for a length-1 input (an empty array; in 2D, when either axis has length 1, an empty array or rows of empty arrays such as `[[], []]` for a 5×1 matrix), because the positive-frequency half has `floor(n/2) = 0` points; and with `useOneTurn: true` (the default) `filter1d`/`filter2d` return 0 for a length-1 input, because its period `(n-1)*dt` is 0.
+
 ### Input validation (next release)
 Every public function (`fft1d`, `ifft1d`, `fft2d`, `ifft2d`, `spectrum1d`, `spectrum2d`, `filter1d`, `filter2d`) now validates all inputs at the entry, identically for `type: 'dft'` and `type: 'pow2'`. Invalid input throws a synchronous `Error` with the message `invalid <name>: must be <description>`; the message never contains the input value. Inputs that were silently accepted, coerced or replaced by defaults before now throw:
 
@@ -99,6 +102,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.33/dist/w-fft.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.34/dist/w-fft.umd.js"></script>
 
 ```
