@@ -117,6 +117,6 @@ console.log(res)
 
 Add script for w-fft.
 ```alias
-<script src="https://cdn.jsdelivr.net/npm/w-fft@1.0.37/dist/w-fft.umd.js"></script>
+<script src="https://yuda-lyu.github.io/w-fft/dist/w-fft.umd.js"></script>
 
 ```
